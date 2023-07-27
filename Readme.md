@@ -120,7 +120,7 @@ All timestamps are given in UTC+0. Timestamp format is %Y%m%d%H%M%S. See the for
 ## Compiling
 The following libraries are required for compilation: libcurl, pugixml, and, shockingly, Rainmeter's SDK. The project is configured to statically link with these libraries.
 
-rainmeter-plugin-sdk should be located in the same parent folder as CanWeatherPlugin. File structure should be something like this:
+rainmeter-plugin-sdk should be located in the same parent folder as CanWeatherPlugin. File structure should look something like this:
 ```
 └── CodingFolder\
     ├── CanWeatherPlugin\
@@ -138,7 +138,7 @@ rainmeter-plugin-sdk should be located in the same parent folder as CanWeatherPl
 
 libcurl and pugixml should be installed via vcpkg. vcpkg can be installed by following the instructions found in this webpage: https://vcpkg.io/en/getting-started.html
 
-Once vcpkg is installed, run the following commands:
+Once vcpkg is installed, run the following command:
 ```
 vcpkg.exe install curl:x64-windows-static-md curl:x86-windows-static-md pugixml:x64-windows-static-md pugixml:x86-windows-static-md
 ```
