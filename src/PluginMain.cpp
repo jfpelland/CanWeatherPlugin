@@ -93,8 +93,8 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 	if(source[0] == '[')
 	{
 		// child measure
-		auto data = RmReadString(rm, L"Data", L"N/A");
-		MeasureType mtype = getTypeFromString(data);
+		auto dataString = RmReadString(rm, L"Data", L"N/A");
+		MeasureType mtype = getTypeFromString(dataString);
 		measure = new MeasureChild(mtype, source, rm, parentSkin);
 	}
 	else
