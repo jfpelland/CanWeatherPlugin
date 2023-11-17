@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <pugixml.hpp>
 
 #include "MeasureType.hpp"
@@ -15,7 +15,7 @@
 class WeatherInfo
 {
 private:
-	std::map<MeasureType, WeatherElement*> info;
+	std::unordered_map<MeasureType, WeatherElement*> info;
 	bool errorState;
 
 public:

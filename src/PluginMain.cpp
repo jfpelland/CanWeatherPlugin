@@ -12,7 +12,7 @@
 	#include "..\..\rainmeter-plugin-sdk\API\RainmeterAPI.h"
 #endif // _DEBUG
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <strsafe.h>
 #include <atlbase.h>
@@ -23,11 +23,12 @@
 using std::transform;
 using std::string;
 using std::wstring;
-using std::map;
+using std::unordered_map;
 
 using pugi::xml_parse_result;
 
-map<SkinPtr, map<wstring, MeasureParent*>> parentTable{};
+typedef unordered_map<SkinPtr, unordered_map<wstring, MeasureParent*>> ParentTableType;
+ParentTableType parentTable{};
 
 bool isParentMeasure(const void* data)
 {
