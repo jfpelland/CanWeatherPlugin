@@ -15,8 +15,8 @@
 typedef void* MeasurePtr;
 typedef void* SkinPtr;
 
-constexpr int MinUpdateTime = 60;
-constexpr int DefaultUpdateTime = 600;
+constexpr int64_t MinUpdateTime = 60;
+constexpr int64_t DefaultUpdateTime = 600;
 
 class MeasureBase
 {
@@ -40,7 +40,7 @@ private:
 	int64_t lastUpdate;
 
 public:
-	int updateFrequency; // in seconds -- default = 10 minutes, lowest is one minute
+	int64_t updateFrequency; // in seconds -- default = 10 minutes, lowest is one minute
 	WeatherInfo wdata{};
 
 	MeasureParent(int _seconds, std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr) :
