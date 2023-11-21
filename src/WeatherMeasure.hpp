@@ -38,16 +38,16 @@ class MeasureParent : public MeasureBase
 {
 private:
 	int64_t lastUpdate;
+	int64_t updateFrequency; // in seconds -- default = 10 minutes, lowest is one minute
 
 public:
-	int64_t updateFrequency; // in seconds -- default = 10 minutes, lowest is one minute
 	WeatherInfo wdata{};
 
-	MeasureParent(int _seconds, std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr) :
+	MeasureParent(std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr) :
 		MeasureBase(MeasureType::Parent, _source, _rmPtr, _skinPtr),
-		updateFrequency{ std::max(_seconds, MinUpdateTime) },
-		lastUpdate{ 0 } {}
+		updateFrequency{}, lastUpdate{} {}
 
+	void setUpdateFrequency(int64_t period) { updateFrequency = std::max(period, MinUpdateTime); }
 	uint64_t getLastUpdateTime() { return lastUpdate; }
 	uint64_t timeUntilNextUpdate();
 	void forceUpdate() { lastUpdate = 0; }
@@ -58,6 +58,6 @@ public:
 class MeasureChild : public MeasureBase
 {
 public:
-	MeasureChild(MeasureType _t, std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr)
-		: MeasureBase(_t, _source, _rmPtr, _skinPtr) {}
+	MeasureChild(std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr)
+		: MeasureBase(MeasureType::None, _source, _rmPtr, _skinPtr) {}
 };

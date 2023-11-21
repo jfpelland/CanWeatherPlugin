@@ -90,20 +90,16 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 	MeasureBase* measure;
 	auto source = RmReadString(rm, L"Source", L"N/A", 0);
 	SkinPtr parentSkin = RmGetSkin(rm);
-	
+
 	if(source[0] == '[')
 	{
-		// child measure
-		auto dataString = RmReadString(rm, L"Data", L"N/A");
-		MeasureType mtype = getTypeFromString(dataString);
-		measure = new MeasureChild(mtype, source, rm, parentSkin);
+		measure = new MeasureChild(source, rm, parentSkin);
 	}
 	else
 	{
 		// parent  measure
-		auto refreshTime = RmReadInt(rm, L"RefreshTime", DefaultUpdateTime);
 		auto measureName = getMeasureName(rm);
-		measure = new MeasureParent(refreshTime, source, rm, parentSkin);
+		measure = new MeasureParent(source, rm, parentSkin);
 		parentTable[parentSkin][measureName] = static_cast<MeasureParent*>(measure);
 		delete[] measureName;
 	}
@@ -113,12 +109,24 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 PLUGIN_EXPORT void Reload(void* data, MeasurePtr rm, double* maxValue)
 {
 	auto mb = static_cast<MeasureBase*>(data);
-	auto source = RmReadString(rm, L"Source", L"N/A", false);
+	mb->source = RmReadString(rm, L"Source", L"N/A", false);
 
-	if(lstrcmpW(mb->source.c_str(), source) != 0)
+	if(mb->isParentMeasure())
 	{
-		mb->source = source;
+		auto mp = static_cast<MeasureParent*>(mb);
+		auto period = RmReadInt(rm, L"RefreshTime", DefaultUpdateTime);
+		mp->setUpdateFrequency(period);
 	}
+	else
+	{
+		auto dataField = RmReadString(rm, L"Data", L"N/A");
+		mb->type = getTypeFromString(dataField);
+	}
+}
+
+PLUGIN_EXPORT double Update(void* data)
+{
+	auto mb = static_cast<MeasureBase*>(data);
 	if(mb->isParentMeasure())
 	{
 		auto mp = static_cast<MeasureParent*>(mb);
@@ -133,37 +141,23 @@ PLUGIN_EXPORT void Reload(void* data, MeasurePtr rm, double* maxValue)
 			if(dlResult != DownloadErrorCode::OK)
 			{
 				logDownloadError(dlResult, mp->rmPtr);
-				return;	
+				return 0.0;
 			}
 			auto parseResult = parseXMLData(xmlFile, mp->wdata);
 			if(!parseResult)
 			{
 				logXMLParseError(parseResult, mp->rmPtr);
-				return;
+				return 0.0;
 			}
 			mp->wdata.setErrorState(false);
 			RmLog(mp->rmPtr, LOG_NOTICE, L"Weather data successfully updated.");
 		}
+		return static_cast<MeasureParent*>(data)->timeUntilNextUpdate();
 	}
 	else
 	{
-		auto dataField = RmReadString(rm, L"Data", L"N/A");
-		MeasureType mtype = getTypeFromString(dataField);
-		if(mb->type != mtype)
-		{
-			mb->type = mtype;
-		}
+		return getParentMeasure(mb)->wdata[mb->type]->numValue;
 	}
-}
-
-PLUGIN_EXPORT double Update(void* data)
-{
-	auto mb = static_cast<MeasureBase*>(data);
-	if(mb->isParentMeasure())
-	{
-		return static_cast<MeasureParent*>(data)->timeUntilNextUpdate();
-	}
-	return getParentMeasure(mb)->wdata[mb->type]->numValue;
 }
 
 PLUGIN_EXPORT void Finalize(void* data)
