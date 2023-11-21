@@ -30,16 +30,16 @@ using pugi::xml_parse_result;
 typedef unordered_map<SkinPtr, unordered_map<wstring, MeasureParent*>> ParentTableType;
 ParentTableType parentTable{};
 
-bool isParentMeasure(const void* data)
+bool isParentMeasure(void* data)
 {
-	return ((MeasureBase*) data)->isParentMeasure();
+	return static_cast<MeasureBase*>(data)->isParentMeasure();
 }
 
-MeasureParent* getParentMeasure(const MeasureBase* mb)
+MeasureParent* getParentMeasure(MeasureBase* mb)
 {
 	if(isParentMeasure(mb))
 	{
-		return (MeasureParent *) mb;
+		return static_cast<MeasureParent*>(mb);
 	}
 	return parentTable[mb->skinPtr][mb->source];
 }
@@ -104,7 +104,7 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 		auto refreshTime = RmReadInt(rm, L"RefreshTime", DefaultUpdateTime);
 		auto measureName = getMeasureName(rm);
 		measure = new MeasureParent(refreshTime, source, rm, parentSkin);
-		parentTable[parentSkin][measureName] = (MeasureParent*) measure;
+		parentTable[parentSkin][measureName] = static_cast<MeasureParent*>(measure);
 		delete[] measureName;
 	}
 	*data = measure;
@@ -112,7 +112,7 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 
 PLUGIN_EXPORT void Reload(void* data, MeasurePtr rm, double* maxValue)
 {
-	auto mb = (MeasureBase*) data;
+	auto mb = static_cast<MeasureBase*>(data);
 	auto source = RmReadString(rm, L"Source", L"N/A", false);
 
 	if(lstrcmpW(mb->source.c_str(), source) != 0)
@@ -121,7 +121,7 @@ PLUGIN_EXPORT void Reload(void* data, MeasurePtr rm, double* maxValue)
 	}
 	if(mb->isParentMeasure())
 	{
-		auto mp = (MeasureParent*) data;
+		auto mp = static_cast<MeasureParent*>(mb);
 		if(mp->needsUpdate())
 		{
 			mp->wdata.setErrorState(true);
@@ -158,10 +158,10 @@ PLUGIN_EXPORT void Reload(void* data, MeasurePtr rm, double* maxValue)
 
 PLUGIN_EXPORT double Update(void* data)
 {
-	MeasureBase* mb = (MeasureBase*) data;
+	auto mb = static_cast<MeasureBase*>(data);
 	if(mb->isParentMeasure())
 	{
-		return ((MeasureParent*) mb)->timeUntilNextUpdate();
+		return static_cast<MeasureParent*>(data)->timeUntilNextUpdate();
 	}
 	return getParentMeasure(mb)->wdata[mb->type]->numValue;
 }
@@ -170,17 +170,17 @@ PLUGIN_EXPORT void Finalize(void* data)
 {
 	if(isParentMeasure(data))
 	{
-		delete ((MeasureParent*) data);
+		delete static_cast<MeasureParent*>(data);
 	}
 	else
 	{
-		delete ((MeasureChild*) data);
+		delete static_cast<MeasureChild*>(data);;
 	}
 }
 
 PLUGIN_EXPORT LPCWSTR GetString(void* data)
 {
-	MeasureBase* mb = (MeasureBase*) data;
+	auto mb = static_cast<MeasureBase*>(data);
 	if(mb->isParentMeasure())
 	{
 		return mb->source.c_str();
@@ -192,7 +192,7 @@ PLUGIN_EXPORT void ExecuteBang(void* data, LPCWSTR args)
 {
 	if(isParentMeasure(data))
 	{
-		auto mp = (MeasureParent*) data;
+		auto mp = static_cast<MeasureParent*>(data);
 		if(lstrcmpW(args, L"ForceRefresh") == 0)
 		{
 			mp->forceUpdate();
@@ -205,7 +205,7 @@ PLUGIN_EXPORT void ExecuteBang(void* data, LPCWSTR args)
 	}
 	else
 	{
-		auto mb = (MeasureBase*) data;
+		auto mb = static_cast<MeasureBase*>(data);
 		RmLog(mb->rmPtr, LOG_WARNING, L"Warning: !CommandMeasure used on non-parent measure. Ignoring command.");
 	}
 }
@@ -213,16 +213,17 @@ PLUGIN_EXPORT void ExecuteBang(void* data, LPCWSTR args)
 #ifdef _DEBUG
 int main()
 {
+#pragma warning(disable: 4311)
 	void *ptr, *ptr2;
-	Initialize(&ptr, (void*) 1);
-	Initialize(&ptr2, (void*) 2);
-	Reload(ptr, (void*) 1, nullptr);
-	Reload(ptr2, (void*) 2, nullptr);
+	Initialize(&ptr, reinterpret_cast<void*>(1));
+	Initialize(&ptr2, reinterpret_cast<void*>(2));
+	Reload(ptr, reinterpret_cast<void*>(1), nullptr);
+	Reload(ptr2, reinterpret_cast<void*>(2), nullptr);
 	Update(ptr);
 	Update(ptr2);
 	Finalize(ptr);
 	Finalize(ptr2);
-
+#pragma warning(default: 4311)
 	return 0;
 }
 #endif // _DEBUG
