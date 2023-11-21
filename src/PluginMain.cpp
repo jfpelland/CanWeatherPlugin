@@ -174,7 +174,7 @@ PLUGIN_EXPORT void ExecuteBang(void* data, LPCWSTR args)
 	if(isParentMeasure(data))
 	{
 		auto mp = static_cast<MeasureParent*>(data);
-		if(lstrcmpW(args, L"ForceRefresh") == 0)
+		if(lstrcmpiW(args, L"ForceRefresh") == 0)
 		{
 			mp->forceUpdate();
 			RmLog(mp->rmPtr, LOG_NOTICE, L"Notice: ForceRefresh called on parent measure.");
