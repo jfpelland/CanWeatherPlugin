@@ -14,14 +14,11 @@
 
 #include <unordered_map>
 #include <string>
-#include <strsafe.h>
-#include <atlbase.h>
 #include <atlstr.h>
 
 #include "WeatherIO.hpp"
 #include "WeatherMeasure.hpp"
 
-using std::transform;
 using std::string;
 using std::wstring;
 using std::unordered_map;

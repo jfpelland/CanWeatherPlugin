@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include <map>
 #include <string>
 
 enum class MeasureType

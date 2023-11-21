@@ -7,7 +7,6 @@
 #pragma once
 
 #include <algorithm>
-#include <string>
 #include <atlstr.h>
 
 #include "MeasureType.hpp"
