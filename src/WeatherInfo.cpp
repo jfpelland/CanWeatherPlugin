@@ -6,6 +6,8 @@
 
 #include "WeatherInfo.hpp"
 
+using std::make_shared;
+using std::shared_ptr;
 using std::string;
 using std::wstring;
 
@@ -14,22 +16,11 @@ using pugi::xml_node;
 WeatherInfo::WeatherInfo()
 {
 	errorState = false;
-	info[MeasureType::None] = new WeatherElement("None");
-	info[MeasureType::Error] = new WeatherElement("---");
+	info[MeasureType::None] = make_shared<WeatherElement>("None");
+	info[MeasureType::Error] = make_shared<WeatherElement>("---");
 }
 
-WeatherInfo::~WeatherInfo()
-{
-	for(auto const &[key, val] : info)
-	{
-		if(val)
-		{
-			delete val;
-		}
-	}
-}
-
-WeatherElement* WeatherInfo::operator[](MeasureType mt)
+shared_ptr<WeatherElement> WeatherInfo::operator[](MeasureType mt)
 {
 	if(isErrorState())
 	{
@@ -40,23 +31,23 @@ WeatherElement* WeatherInfo::operator[](MeasureType mt)
 
 void WeatherInfo::addString(string s, MeasureType mt)
 {
-	info[mt] = new WeatherElement(s);
+	info[mt] = make_shared<WeatherElement>(s);
 }
 
 void WeatherInfo::addString(const xml_node& node, MeasureType mt)
 {
-	info[mt] = new WeatherElement(node.child_value());
+	info[mt] = make_shared<WeatherElement>(node.child_value());
 }
 
 void WeatherInfo::addNumber(const xml_node& node, MeasureType mt)
 {
-	info[mt] = new WeatherElement(node.child_value(), node.text().as_float());
+	info[mt] = make_shared<WeatherElement>(node.child_value(), node.text().as_float());
 }
 
 void WeatherInfo::addNumberWithAttribute(const xml_node& node, MeasureType mt_attr, MeasureType mt_num, const pugi::char_t* attr)
 {
-	info[mt_attr] = new WeatherElement(node.attribute(attr).value());
-	info[mt_num] = new WeatherElement(node.child_value(), node.text().as_double());
+	info[mt_attr] = make_shared<WeatherElement>(node.attribute(attr).value());
+	info[mt_num] = make_shared<WeatherElement>(node.child_value(), node.text().as_double());
 }
 
 wstring WeatherInfo::prettyPrint() const

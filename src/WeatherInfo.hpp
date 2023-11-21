@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 #include <pugixml.hpp>
 
@@ -15,14 +16,13 @@
 class WeatherInfo
 {
 private:
-	std::unordered_map<MeasureType, WeatherElement*> info;
+	std::unordered_map<MeasureType, std::shared_ptr<WeatherElement>> info;
 	bool errorState;
 
 public:
 	WeatherInfo();
-	~WeatherInfo();
 
-	WeatherElement* operator[](MeasureType mt);
+	std::shared_ptr<WeatherElement> operator[](MeasureType mt);
 
 	bool contains(MeasureType mt) { return info.contains(mt); }
 
