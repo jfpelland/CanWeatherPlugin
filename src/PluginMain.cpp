@@ -76,7 +76,7 @@ void logXMLParseError(xml_parse_result& parseResult, MeasurePtr rm)
 PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 {
 	MeasureBase* measure;
-	auto source = RmReadString(rm, L"Source", L"N/A", 0);
+	auto source = RmReadString(rm, L"Source", L"N/A", false);
 	SkinPtr parentSkin = RmGetSkin(rm);
 
 	if(source[0] == '[')
@@ -139,7 +139,7 @@ PLUGIN_EXPORT double Update(void* data)
 			mp->wdata.setErrorState(false);
 			RmLog(mp->rmPtr, LOG_NOTICE, L"Weather data successfully updated.");
 		}
-		return static_cast<MeasureParent*>(data)->timeUntilNextUpdate();
+		return static_cast<double>(mp->timeUntilNextUpdate());
 	}
 	else
 	{
