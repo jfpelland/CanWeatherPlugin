@@ -16,6 +16,7 @@
 #include <string>
 #include <strsafe.h>
 #include <atlbase.h>
+#include <atlstr.h>
 
 #include "WeatherIO.hpp"
 #include "WeatherMeasure.hpp"
@@ -41,20 +42,7 @@ MeasureParent* getParentMeasure(MeasureBase* mb)
 	{
 		return static_cast<MeasureParent*>(mb);
 	}
-	return parentTable[mb->skinPtr][mb->source];
-}
-
-// Return value uses dynamically allocated memory. Needs to be freed by caller.
-// Returns name of measure enclosed in brackets.
-LPCWSTR getMeasureName(void *rm)
-{
-	auto measureName = RmGetMeasureName(rm);
-	auto length = wcslen(measureName) + 3; // +3 for '[', ']', and '\0';
-	WCHAR* buffer = new WCHAR[length]{ L'[', L'\0' };
-	StringCchCatW(buffer, length, measureName);
-	buffer[length - 2] = L']';
-	buffer[length - 1] = L'\0';
-	return buffer;
+	return parentTable[mb->skinPtr][mb->source.GetString()];
 }
 
 void logDownloadError(DownloadErrorCode dlResult, MeasurePtr rm)
@@ -98,10 +86,9 @@ PLUGIN_EXPORT void Initialize(void** data, MeasurePtr rm)
 	else
 	{
 		// parent  measure
-		auto measureName = getMeasureName(rm);
+		auto measureName = L'[' + CString(RmGetMeasureName(rm)) + L']';
 		measure = new MeasureParent(source, rm, parentSkin);
-		parentTable[parentSkin][measureName] = static_cast<MeasureParent*>(measure);
-		delete[] measureName;
+		parentTable[parentSkin][measureName.GetString()] = static_cast<MeasureParent*>(measure);
 	}
 	*data = measure;
 }
@@ -136,7 +123,7 @@ PLUGIN_EXPORT double Update(void* data)
 			mp->updateTime();
 
 			string xmlFile;
-			auto narrowString = CW2A(mp->source.c_str());
+			auto narrowString = CW2A(mp->source);
 			auto dlResult = downloadData(narrowString, xmlFile);
 			if(dlResult != DownloadErrorCode::OK)
 			{
@@ -177,7 +164,7 @@ PLUGIN_EXPORT LPCWSTR GetString(void* data)
 	auto mb = static_cast<MeasureBase*>(data);
 	if(mb->isParentMeasure())
 	{
-		return mb->source.c_str();
+		return mb->source.GetString();
 	}
 	return getParentMeasure(mb)->wdata[mb->type]->strValue;
 }

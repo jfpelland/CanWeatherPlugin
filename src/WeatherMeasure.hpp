@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <string>
+#include <atlstr.h>
 
 #include "MeasureType.hpp"
 #include "WeatherInfo.hpp"
@@ -21,13 +22,13 @@ constexpr int64_t DefaultUpdateTime = 600;
 class MeasureBase
 {
 public:
-	std::wstring source;
+	CString source;
 	MeasureType type = MeasureType::None;
 	MeasurePtr rmPtr;
 	SkinPtr skinPtr;
 
 protected:
-	MeasureBase(MeasureType _t, std::wstring _s, MeasurePtr _rmPtr, SkinPtr _skinPtr)
+	MeasureBase(MeasureType _t, CString _s, MeasurePtr _rmPtr, SkinPtr _skinPtr)
 		: type{ _t }, source{ _s }, rmPtr{ _rmPtr }, skinPtr{ _skinPtr } {}
 
 public:
@@ -43,7 +44,7 @@ private:
 public:
 	WeatherInfo wdata{};
 
-	MeasureParent(std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr) :
+	MeasureParent(CString _source, MeasurePtr _rmPtr, SkinPtr _skinPtr) :
 		MeasureBase(MeasureType::Parent, _source, _rmPtr, _skinPtr),
 		updateFrequency{}, lastUpdate{} {}
 
@@ -58,6 +59,6 @@ public:
 class MeasureChild : public MeasureBase
 {
 public:
-	MeasureChild(std::wstring _source, MeasurePtr _rmPtr, SkinPtr _skinPtr)
+	MeasureChild(CString _source, MeasurePtr _rmPtr, SkinPtr _skinPtr)
 		: MeasureBase(MeasureType::None, _source, _rmPtr, _skinPtr) {}
 };

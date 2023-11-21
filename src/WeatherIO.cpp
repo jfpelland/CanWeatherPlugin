@@ -165,13 +165,13 @@ pugi::xml_parse_result parseXMLData(string& xmlFile, WeatherInfo& weatherInfo)
 		}
 
 		// Sanity Checks
-		if(lstrlenW(weatherInfo[MeasureType::PrecipChance]->strValue) == 0)
+		if(weatherInfo[MeasureType::PrecipChance]->strValue.GetLength() == 0)
 		{
 			auto precip = weatherInfo[MeasureType::PrecipChance];
 			precip->setStringValue(L"---");
 			precip->setStringOnly();
 		}
-		if(lstrlenW(weatherInfo[MeasureType::WindSpeed]->strValue) == 0)
+		if(weatherInfo[MeasureType::WindSpeed]->strValue.GetLength() == 0)
 		{
 			auto windSpeed = weatherInfo[MeasureType::WindSpeed];
 			windSpeed->setStringValue(L"---");
